@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Outfitment</string>
+    <string name="title_activity_display_image">DisplayImageActivity</string>
 </resources>
