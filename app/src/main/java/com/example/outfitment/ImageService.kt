@@ -9,17 +9,14 @@ import java.nio.ByteOrder
 class ImageService {
 
     companion object{
-        fun getImageForModel(context: Context, resourceId: Int, modelInputSize: Int): ByteBuffer {
-            // Get image from resources
-            val inputStream = context.resources.openRawResource(resourceId)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
+        fun getImageForModel(context: Context, imageBitmap: Bitmap, modelInputSize: Int): ByteBuffer {
 
             // Allocate buffer based on model input size
             val byteBuffer = ByteBuffer.allocateDirect(4 * modelInputSize * modelInputSize * 3)
             byteBuffer.order(ByteOrder.nativeOrder())
 
             // resize
-            val resizedBitmap = Bitmap.createScaledBitmap(bitmap, modelInputSize, modelInputSize, false)
+            val resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, modelInputSize, modelInputSize, false)
 
             // convert
             for (y in 0 until resizedBitmap.height) {
