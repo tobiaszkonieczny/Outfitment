@@ -1,6 +1,7 @@
 package com.example.outfitment
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.outfitment.ui.theme.OutfitmentTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,20 +29,17 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         modelService = ModelService(this)
-        modelService.inputImageId =R.drawable.default_image
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.default_image)
         setContent {
+            val resultViewModel: ResultViewModel = viewModel()
+            val navController = rememberNavController()
             OutfitmentTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                    Button(onClick = {
-                        Intent(this, DisplayImageActivity::class.java).also {
-                            startActivity(it)
-                        }
-                    }){
-                        Text(text = "Click")
+                NavHost(navController, startDestination = "loading") {
+                    composable("loading") {
+                        LoadingScreen(navController, bitmap, resultViewModel)
+                    }
+                    composable("result") {
+                        Result(resultViewModel)
                     }
                 }
             }

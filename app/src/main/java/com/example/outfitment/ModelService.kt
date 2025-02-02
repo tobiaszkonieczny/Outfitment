@@ -1,7 +1,11 @@
 package com.example.outfitment
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tflite.java.TfLite
 import org.tensorflow.lite.InterpreterApi
@@ -12,7 +16,9 @@ import java.nio.channels.FileChannel
 class ModelService(private val context: Context) {
     private var modelFileName: String = "unet_model6.tflite"
     private lateinit var interpreter: InterpreterApi
-    var inputImageId: Int = R.drawable.default_image
+    var isInterpreterInitialized by mutableStateOf(false) // Dodaj stan do monitorowania inicjalizacji
+
+    var imageBitmap: Bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
 
     private val initializeTask: Task<Void> by lazy { TfLite.initialize(context) }
 
@@ -24,22 +30,29 @@ class ModelService(private val context: Context) {
                 loadModelFile(context, modelFileName),
                 interpreterOption
             )
+            isInterpreterInitialized = true // Zmiana stanu na zakończenie inicjalizacji
         }.addOnFailureListener { e ->
             Log.e("Interpreter", "Cannot initialize interpreter", e)
         }
     }
 
-    fun runInterpreter(): Array<Array<Array<FloatArray>>> {
+    // Run interpreter only if initialized
+    fun runInterpreter(): Array<Array<Array<FloatArray>>>? {
+        if (!isInterpreterInitialized) {
+            Log.e("Interpreter", "Interpreter not initialized")
+            return null
+        }
+
         val labelProbArray = Array(1) {
             Array(256) {
-                Array(256){
+                Array(256) {
                     FloatArray(4)
                 }
             }
         }
-        try{
-            interpreter.run(ImageService.getImageForModel(context,inputImageId, 256), labelProbArray)
-        }catch (e: Exception){
+        try {
+            interpreter.run(ImageService.getImageForModel(context, imageBitmap, 256), labelProbArray)
+        } catch (e: Exception) {
             Log.e("Interpreter", "Error running interpreter", e)
         }
         interpreter.close()
