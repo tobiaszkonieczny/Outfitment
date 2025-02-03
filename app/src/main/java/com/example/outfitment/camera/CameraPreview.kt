@@ -32,14 +32,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavController
 import com.example.outfitment.R
+import com.example.outfitment.ResultViewModel
 
 
 /**
  * This function renders a composable component that displays live camera feed.
  */
 @Composable
-fun GetCameraPreview(context: Context, showGrid: Boolean = true) {
+fun GetCameraPreview(navController: NavController, context: Context,resultViewModel: ResultViewModel, showGrid: Boolean = true) {
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val cameraManager = remember { CameraManager() }
 
@@ -55,6 +57,8 @@ fun GetCameraPreview(context: Context, showGrid: Boolean = true) {
         CameraPreview(cameraManager, context, lifecycleOwner, showGrid) { imageProxy ->
             capturedImage.value = imageProxy
             isPhotoCaptured.value = true
+            resultViewModel.imageBitmap = imageProxy.toBitmap()
+            navController.navigate("loading")
         }
     }
 }
