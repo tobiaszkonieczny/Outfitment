@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -25,14 +26,16 @@ fun LoadingScreen(navController: NavController, bitmap: Bitmap, resultViewModel:
     modelService.imageBitmap = bitmap
 
     LaunchedEffect(modelService.isInterpreterInitialized) {
-        if (modelService.isInterpreterInitialized) {
-            val result = modelService.runInterpreter()
-            result?.let {
-                val detectedPixels = modelService.getDetectedPixels(it, threshold = 0.5f)
-                resultViewModel.detectedPixels = detectedPixels // Store detected pixels in ViewModel
-                resultViewModel.imageBitmap = bitmap // Store image bitmap in ViewModel
-                // Once processing is complete, update state
-                isProcessingComplete = true
+        withContext(Dispatchers.IO) {
+            if (modelService.isInterpreterInitialized) {
+                val result = modelService.runInterpreter()
+                result?.let {
+                    val detectedPixels = modelService.getDetectedPixels(it, threshold = 0.5f)
+                    resultViewModel.detectedPixels = detectedPixels // Store detected pixels in ViewModel
+                    resultViewModel.imageBitmap = bitmap // Store image bitmap in ViewModel
+                    // Once processing is complete, update state
+                    isProcessingComplete = true
+                }
             }
         }
     }
@@ -45,7 +48,9 @@ fun LoadingScreen(navController: NavController, bitmap: Bitmap, resultViewModel:
     }
 
     // UI while processing
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         CircularProgressIndicator()
     }
 }
