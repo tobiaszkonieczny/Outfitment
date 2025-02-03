@@ -26,19 +26,19 @@ class CameraManager {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
 
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
+            this.cameraProvider = cameraProviderFuture.get()
 
             val preview = androidx.camera.core.Preview.Builder().build().apply {
                 setSurfaceProvider(previewView.surfaceProvider)
             }
 
-            imageCapture = ImageCapture.Builder().build()
+            imageCapture = ImageCapture.Builder()
+                .setTargetResolution(android.util.Size(1080, 1080))
+                .build()
 
             try {
-                // Disconnect the camera if it already exist
                 cameraProvider?.unbindAll()
 
-                // Connect camera with lifecycle of current component
                 cameraProvider?.bindToLifecycle(
                     lifecycleOwner,
                     CameraConfig.DEFAULT_BACK_CAMERA,
@@ -55,6 +55,15 @@ class CameraManager {
         cameraProvider?.unbindAll()
     }
 
+    fun setZoom(zoomLevel: Float, lifecycleOwner: LifecycleOwner) {
+        cameraProvider?.let { provider ->
+            val camera = provider.bindToLifecycle(
+                lifecycleOwner, CameraConfig.DEFAULT_BACK_CAMERA
+            )
+            camera.cameraControl.setLinearZoom(zoomLevel / 5f) // Normalizacja zoomu (CameraX wymaga zakresu 0-1)
+        }
+    }
+
     fun takePhoto(context: Context, onImageCaptured: (ImageProxy) -> Unit) {
         val imageCapture = imageCapture ?: return
 
@@ -62,12 +71,16 @@ class CameraManager {
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    Log.d("CameraManager", "Zdjęcie przechwycone!")
-                    onImageCaptured(image) // Przekazujemy surowe dane obrazu
+                    // Logowanie rozdzielczości zdjęcia
+                    val width = image.width
+                    val height = image.height
+                    Log.d("CameraManagering", "Zdjęcie przechwycone! Rozdzielczość: $width x $height")
+
+                    onImageCaptured(image) // Przekazywanie zdjęcia po przechwyceniu
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Log.e("CameraManager", "Błąd przechwytywania zdjęcia", exception)
+                    Log.e("CameraManagering", "Błąd przechwytywania zdjęcia", exception)
                 }
             }
         )
