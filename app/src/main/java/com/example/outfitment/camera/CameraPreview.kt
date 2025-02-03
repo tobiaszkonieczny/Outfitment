@@ -1,6 +1,7 @@
 package com.example.outfitment.camera
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
@@ -47,17 +48,17 @@ fun GetCameraPreview(navController: NavController, context: Context,resultViewMo
 
     // States for the components display.
     val isPhotoCaptured = remember { mutableStateOf(false) }
-    val capturedImage = remember { mutableStateOf<ImageProxy?>(null) }
+    val capturedImage = remember { mutableStateOf<Bitmap?>(null) }
 
     // If the photo was captured, render new component
     if (isPhotoCaptured.value) {
         PhotoCapturedScreen(capturedImage.value)
     } else {
         // Render Camera preview
-        CameraPreview(cameraManager, context, lifecycleOwner, showGrid) { imageProxy ->
-            capturedImage.value = imageProxy
+        CameraPreview(cameraManager, context, lifecycleOwner, showGrid) { imageBitmap ->
+            capturedImage.value = imageBitmap
             isPhotoCaptured.value = true
-            resultViewModel.imageBitmap = imageProxy.toBitmap()
+            resultViewModel.imageBitmap = imageBitmap
             navController.navigate("loading")
         }
     }
@@ -69,7 +70,7 @@ fun CameraPreview(
     context: Context,
     lifecycleOwner: LifecycleOwner,
     showGrid: Boolean,
-    onImageCaptured: (ImageProxy) -> Unit
+    onImageCaptured: (Bitmap) -> Unit
 ) {
     val zoomLevel = remember { mutableStateOf(1f) } // Zoom od 1x (bez powiększenia)
     Column(
@@ -124,8 +125,8 @@ fun CameraPreview(
         ) {
             IconButton(
                 onClick = {
-                    cameraManager.takePhoto(context) { imageProxy ->
-                        onImageCaptured(imageProxy) // Callback to update the image and capture the photo
+                    cameraManager.takePhoto(context) { imageBitmap ->
+                        onImageCaptured(imageBitmap) // Callback to update the image and capture the photo
                     }
                 }
             ) {
@@ -139,15 +140,15 @@ fun CameraPreview(
 }
 
 @Composable
-fun PhotoCapturedScreen(imageProxy: ImageProxy?) {
+fun PhotoCapturedScreen(imageBitmap: Bitmap?) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (imageProxy != null) {
-            val bitmap = remember { imageProxy.toBitmap() }
+        if (imageBitmap != null) {
+            val bitmap = remember { imageBitmap }
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = "Captured Photo",

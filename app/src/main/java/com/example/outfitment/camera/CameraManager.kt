@@ -2,6 +2,8 @@ package com.example.outfitment.camera
 
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -64,9 +66,9 @@ class CameraManager {
         }
     }
 
-    fun takePhoto(context: Context, onImageCaptured: (ImageProxy) -> Unit) {
+    fun takePhoto(context: Context, onImageCaptured: (Bitmap) -> Unit) {
         val imageCapture = imageCapture ?: return
-
+        var imageBitmap: Bitmap
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageCapturedCallback() {
@@ -74,9 +76,19 @@ class CameraManager {
                     // Logowanie rozdzielczości zdjęcia
                     val width = image.width
                     val height = image.height
-                    Log.d("CameraManagering", "Zdjęcie przechwycone! Rozdzielczość: $width x $height")
-
-                    onImageCaptured(image) // Przekazywanie zdjęcia po przechwyceniu
+                    // Get the rotation degrees
+                    val rotationDegrees = image.imageInfo.rotationDegrees
+                    if (rotationDegrees != 0) {
+                        // You can use a library like Glide or BitmapFactory to rotate the image
+                        // Here's an example using BitmapFactory:
+                        val bitmap = image.toBitmap() // Convert ImageProxy to Bitmap
+                        imageBitmap = rotateBitmap(bitmap, rotationDegrees)
+                        // Now you can use the rotatedBitmap as needed
+                    }
+                    else{
+                        imageBitmap = image.toBitmap()
+                    }
+                    onImageCaptured(imageBitmap) // Przekazywanie zdjęcia po przechwyceniu
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -84,5 +96,10 @@ class CameraManager {
                 }
             }
         )
+    }
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Int): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(degrees.toFloat())
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 }
