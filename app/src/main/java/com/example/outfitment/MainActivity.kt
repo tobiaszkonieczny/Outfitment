@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,17 +48,16 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         modelService = ModelService(this)
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.default_image)
         setContent {
             val resultViewModel: ResultViewModel = viewModel()
             val navController = rememberNavController()
             OutfitmentTheme {
                 NavHost(navController, startDestination = "camera") {
                     composable("camera") {
-                        StartTheCamera(modifier = Modifier.padding(16.dp), context = this@MainActivity)
+                        StartTheCamera(navController, modifier = Modifier.padding(16.dp), context = this@MainActivity, resultViewModel)
                     }
                     composable("loading") {
-                        LoadingScreen(navController, bitmap, resultViewModel)
+                        LoadingScreen(navController, resultViewModel)
                     }
                     composable("result") {
                         Result(resultViewModel)
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun StartTheCamera(modifier: Modifier = Modifier, context: Context) {
+fun StartTheCamera(navController: NavController, modifier: Modifier = Modifier, context: Context, resultViewModel: ResultViewModel) {
     // pobranie stanu permisji
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
 
@@ -80,7 +80,7 @@ fun StartTheCamera(modifier: Modifier = Modifier, context: Context) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            GetCameraPreview(context)
+            GetCameraPreview(navController, context, resultViewModel)
         }
     }
 

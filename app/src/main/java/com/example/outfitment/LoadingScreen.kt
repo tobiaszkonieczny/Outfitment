@@ -18,12 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun LoadingScreen(navController: NavController, bitmap: Bitmap, resultViewModel: ResultViewModel) {
+fun LoadingScreen(navController: NavController, resultViewModel: ResultViewModel) {
     var isProcessingComplete by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val app = context.applicationContext as App
     val modelService = app.modelService
-    modelService.imageBitmap = bitmap
+    modelService.imageBitmap = resultViewModel.imageBitmap!!
 
     LaunchedEffect(modelService.isInterpreterInitialized) {
         withContext(Dispatchers.IO) {
@@ -32,7 +32,7 @@ fun LoadingScreen(navController: NavController, bitmap: Bitmap, resultViewModel:
                 result?.let {
                     val detectedPixels = modelService.getDetectedPixels(it, threshold = 0.5f)
                     resultViewModel.detectedPixels = detectedPixels // Store detected pixels in ViewModel
-                    resultViewModel.imageBitmap = bitmap // Store image bitmap in ViewModel
+                    resultViewModel.imageBitmap = resultViewModel.imageBitmap // Store image bitmap in ViewModel
                     // Once processing is complete, update state
                     isProcessingComplete = true
                 }
