@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.camera.core.ImageProxy
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -81,7 +83,11 @@ fun CameraPreview(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Text above the preview.
-        Text("TAKE A PHOTO", color = Color.DarkGray, modifier = Modifier.padding(bottom = 16.dp))
+        Text("TAKE A PHOTO",
+            color = Color.DarkGray,
+            modifier = Modifier.padding(bottom = 16.dp)
+
+        )
 
         // Camera preview with the person outline grid applied.
         Box(

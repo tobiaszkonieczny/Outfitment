@@ -16,7 +16,7 @@ import java.nio.channels.FileChannel
 class ModelService(private val context: Context) {
     private var modelFileName: String = "unet_model6.tflite"
     private lateinit var interpreter: InterpreterApi
-    var isInterpreterInitialized by mutableStateOf(false) // Dodaj stan do monitorowania inicjalizacji
+    var isInterpreterInitialized by mutableStateOf(false)
 
     var imageBitmap: Bitmap = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888)
 
@@ -30,13 +30,12 @@ class ModelService(private val context: Context) {
                 loadModelFile(context, modelFileName),
                 interpreterOption
             )
-            isInterpreterInitialized = true // Zmiana stanu na zakończenie inicjalizacji
+            isInterpreterInitialized = true
         }.addOnFailureListener { e ->
             Log.e("Interpreter", "Cannot initialize interpreter", e)
         }
     }
 
-    // Run interpreter only if initialized
     fun runInterpreter(): Array<Array<Array<FloatArray>>>? {
         if (!isInterpreterInitialized) {
             Log.e("Interpreter", "Interpreter not initialized")
@@ -55,7 +54,6 @@ class ModelService(private val context: Context) {
         } catch (e: Exception) {
             Log.e("Interpreter", "Error running interpreter", e)
         }
-        interpreter.close()
         return labelProbArray
     }
 

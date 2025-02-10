@@ -1,7 +1,10 @@
 package com.example.outfitment
 
 import android.graphics.Bitmap
+import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ fun LoadingScreen(navController: NavController, resultViewModel: ResultViewModel
     modelService.imageBitmap = resultViewModel.imageBitmap!!
 
     LaunchedEffect(modelService.isInterpreterInitialized) {
+        Log.d("LoadingScreen", "isInterpreterInitialized: ${modelService.isInterpreterInitialized}")
         withContext(Dispatchers.IO) {
             if (modelService.isInterpreterInitialized) {
                 val result = modelService.runInterpreter()
@@ -43,12 +47,15 @@ fun LoadingScreen(navController: NavController, resultViewModel: ResultViewModel
     // Navigate when processing is complete
     LaunchedEffect(isProcessingComplete) {
         if (isProcessingComplete) {
+            isProcessingComplete = false
             navController.navigate("result")
         }
     }
 
     // UI while processing
-    Box(
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
         CircularProgressIndicator()
